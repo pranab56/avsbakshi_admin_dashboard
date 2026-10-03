@@ -3,9 +3,10 @@
 import { Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useResetPasswordMutation } from '../../features/auth/authApi';
 
 export default function ResetPasswordPage() {
   const [newPassword, setNewPassword] = useState<string>('');
@@ -17,7 +18,9 @@ export default function ResetPasswordPage() {
     confirmPassword: ''
   });
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
+  const [resetPasswordMutation, { isLoading }] = useResetPasswordMutation();
 
   const validatePassword = (password: string): string => {
     if (!password) {
@@ -38,7 +41,7 @@ export default function ResetPasswordPage() {
     return '';
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     const newErrors = { newPassword: '', confirmPassword: '' };
 
@@ -59,20 +62,34 @@ export default function ResetPasswordPage() {
 
     // If no errors, proceed with password reset
     if (!newErrors.newPassword && !newErrors.confirmPassword) {
-      setIsLoading(true);
-      setTimeout(() => {
-        setIsLoading(false);
-        toast.success('Password reset successful!');
+      if (!token) {
+        toast.error('Reset token is missing. Please request OTP again.');
+        return;
+      }
+      try {
+        const res = await resetPasswordMutation({
+          token,
+          data: {
+            newPassword,
+            confirmPassword,
+          },
+        }).unwrap();
 
-        // Clear form fields
+        toast.success(res?.message || 'Your password has been successfully reset.');
         setNewPassword('');
         setConfirmPassword('');
 
-        // Redirect to login after a brief delay
         setTimeout(() => {
           router.push('/auth/login');
         }, 1000);
-      }, 600);
+      } catch (err: unknown) {
+        const apiErr = err as { data?: { message?: string; errorMessages?: Array<{ message?: string }> } };
+        const errorMessage =
+          apiErr?.data?.message ||
+          apiErr?.data?.errorMessages?.[0]?.message ||
+          'Failed to reset password. Please try again.';
+        toast.error(errorMessage);
+      }
     }
   };
 

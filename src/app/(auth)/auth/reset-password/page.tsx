@@ -4,9 +4,10 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useState } from "react";
 import toast from "react-hot-toast";
+import { useResetPasswordMutation } from "../../../../features/auth/authApi";
 
 function ResetPasswordContent() {
   const [password, setPassword] = useState("");
@@ -14,9 +15,11 @@ function ResetPasswordContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<{ password?: string; confirmPassword?: string }>({});
-  const [isLoading, setIsLoading] = useState(false);
 
+  const [resetPassword, { isLoading }] = useResetPasswordMutation();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
 
   const validate = () => {
     const newErrors: { password?: string; confirmPassword?: string } = {};
@@ -37,21 +40,39 @@ function ResetPasswordContent() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!validate()) {
       return;
     }
 
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      toast.success("Password reset successfully!");
+    if (!token) {
+      toast.error("Reset token is missing or invalid. Please request OTP again.");
+      return;
+    }
+
+    try {
+      const res = await resetPassword({
+        token,
+        data: {
+          newPassword: password,
+          confirmPassword: confirmPassword,
+        },
+      }).unwrap();
+
+      toast.success(res?.message || "Your password has been successfully reset.");
       setTimeout(() => {
         router.push("/auth/login");
       }, 1000);
-    }, 600);
+    } catch (err: unknown) {
+      const apiErr = err as { data?: { message?: string; errorMessages?: Array<{ message?: string }> } };
+      const errorMessage =
+        apiErr?.data?.message ||
+        apiErr?.data?.errorMessages?.[0]?.message ||
+        "Failed to reset password. Please try again.";
+      toast.error(errorMessage);
+    }
   };
 
   return (

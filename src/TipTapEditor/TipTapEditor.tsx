@@ -346,7 +346,7 @@ const TipTapEditor = ({
             : { minHeight, maxHeight }
         }
       >
-        <div className="bg-[#FF1A60] h-12 rounded-t-lg"></div>
+        <div className="bg-[#AC6135] h-12 rounded-t-lg"></div>
         <div
           className="bg-white p-4"
           style={
@@ -372,7 +372,7 @@ const TipTapEditor = ({
           background: white;
           position: relative;
         }
-        .tiptap-editor-wrapper > .bg-\\[\\#FF1A60\\] {
+        .tiptap-editor-wrapper > .bg-\\[\\#AC6135\\] {
           position: relative;
           overflow-x: auto;
           overflow-y: visible;
@@ -587,7 +587,7 @@ const TipTapEditor = ({
 
       <div className={`tiptap-editor-wrapper ${className}`}>
         {/* Toolbar */}
-        <div className="bg-[#9c4a8f] flex items-center gap-0.5 sm:gap-1 px-1 sm:px-2 py-2 sm:py-2 overflow-x-auto overflow-y-visible scrollbar-hide">
+        <div className="bg-[#AC6135] flex items-center gap-0.5 sm:gap-1 px-1 sm:px-2 py-2 sm:py-2 overflow-x-auto overflow-y-visible scrollbar-hide">
           {/* Font Size Dropdown */}
 
 
@@ -672,7 +672,7 @@ const TipTapEditor = ({
                           }
                         }}
                         onClick={(e) => e.stopPropagation()}
-                        className="flex-1 px-1.5 sm:px-2 py-1 cursor-pointer sm:py-1.5 text-xs sm:text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#FF1A60] focus:border-transparent"
+                        className="flex-1 px-1.5 sm:px-2 py-1 cursor-pointer sm:py-1.5 text-xs sm:text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#AC6135] focus:border-transparent"
                         placeholder="#000000"
                       />
                     </div>

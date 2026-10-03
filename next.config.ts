@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "images.unsplash.com",
+        hostname: "media.rizipt.com",
         pathname: "/**",
       },
       {
@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'api.zilahomes.com',
+        hostname: 'images.unsplash.com',
         pathname: "/**",
       },
       {

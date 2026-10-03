@@ -6,14 +6,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import toast from "react-hot-toast";
-import { saveToken } from "../../../../utils/storage";
+import { useDispatch } from "react-redux";
+import { useLoginMutation } from "../../../../features/auth/authApi";
+import { setCredentials } from "../../../../features/auth/authSlice";
+import { saveRefreshToken, saveToken, saveUser } from "../../../../utils/storage";
 
 export default function LoginPage() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const [login, { isLoading }] = useLoginMutation();
+  const dispatch = useDispatch();
 
   const validate = () => {
     const newErrors: { email?: string; password?: string } = {};
@@ -34,20 +39,38 @@ export default function LoginPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!validate()) {
       return;
     }
 
-    setIsLoading(true);
-    setTimeout(() => {
-      toast.success("Login successful!");
-      saveToken("mock-admin-token-12345");
-      localStorage.setItem("role", "super_admin");
+    try {
+      const res = await login({ email, password }).unwrap();
+      toast.success(res?.message || "User logged in successfully.");
+
+      const accessToken = res?.data?.accessToken;
+      const refreshToken = res?.data?.refreshToken;
+      const user = res?.data;
+
+      if (accessToken) {
+        dispatch(setCredentials({ token: accessToken, refreshToken, user }));
+        saveToken(accessToken);
+        if (refreshToken) saveRefreshToken(refreshToken);
+        if (user) saveUser(user);
+        if (user?.role) localStorage.setItem("role", user.role);
+      }
+
       window.location.href = "/";
-    }, 600);
+    } catch (err: unknown) {
+      const apiErr = err as { data?: { message?: string; errorMessages?: Array<{ message?: string }> } };
+      const errorMessage =
+        apiErr?.data?.message ||
+        apiErr?.data?.errorMessages?.[0]?.message ||
+        "Login failed. Please try again.";
+      toast.error(errorMessage);
+    }
   };
 
   return (

@@ -16,17 +16,19 @@ import { logout } from "@/features/auth/authSlice";
 import { cn } from "@/lib/utils";
 import {
     CalendarCheck,
-    DollarSign,
     FileText,
+    FolderTree,
+    HelpCircle,
     LayoutGrid,
     LogOut,
     LucideIcon,
     Settings,
+    ShieldCheck,
     Users,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -40,6 +42,8 @@ import {
     AlertDialogTitle,
 } from "../ui/alert-dialog";
 
+import toast from "react-hot-toast";
+
 type MenuItem = {
     name: string;
     path: string;
@@ -50,21 +54,25 @@ type MenuItem = {
 const menuItems: MenuItem[] = [
     { name: "Dashboard", path: "/", icon: LayoutGrid, key: "overview" },
     { name: "User Management", path: "/user-management", icon: Users, key: "customer" },
-    { name: "Bookings Management", path: "/reservation-management", icon: CalendarCheck, key: "reservation" },
-    { name: "Transactions History", path: "/revenue-management", icon: FileText, key: "revenue" },
-    //   { name: "Pricing", path: "/pricing", icon: DollarSign, key: "pricing" },
+    { name: "Categories", path: "/categories", icon: FolderTree, key: "category" },
+    { name: "Bookings Management", path: "/booking-management", icon: CalendarCheck, key: "booking" },
+    { name: "Transactions History", path: "/transaction", icon: FileText, key: "revenue" },
+    { name: "Disclaimer", path: "/disclaimer", icon: ShieldCheck, key: "disclaimer" },
+    { name: "FAQ", path: "/faq", icon: HelpCircle, key: "faq" },
     { name: "Settings", path: "/settings", icon: Settings, key: "settings" },
 ];
 
+const EMPTY_PERMISSIONS: string[] = [];
+
 export default function AppSideBar() {
     const pathname = usePathname();
-    const router = useRouter();
     const dispatch = useDispatch();
     const { state } = useSidebar();
     const isCollapsed = state === "collapsed";
 
-    const role = useSelector((s: { auth?: { role: string | null } }) => s.auth?.role);
-    const permissions = useSelector((s: { auth?: { permissions: string[] } }) => s.auth?.permissions || []);
+    const role = useSelector((s: { auth?: { role?: string | null } }) => s.auth?.role);
+    const rawPermissions = useSelector((s: { auth?: { permissions?: string[] } }) => s.auth?.permissions);
+    const permissions = rawPermissions ?? EMPTY_PERMISSIONS;
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
 
@@ -79,8 +87,16 @@ export default function AppSideBar() {
     };
 
     const handleLogout = () => {
+        setIsLogoutModalOpen(false);
         dispatch(logout());
-        router.push("/auth/login");
+
+        // Ensure cookies are cleared immediately on the client side
+        document.cookie = "salon-admin-token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+        document.cookie = "realState-token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+        document.cookie = "salon-role=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+
+        toast.success("Logged out successfully");
+        window.location.href = "/auth/login";
     };
 
     return (

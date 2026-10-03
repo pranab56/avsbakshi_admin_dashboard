@@ -1,11 +1,14 @@
 "use client";
 
-import { Eye, EyeOff } from "lucide-react";
+import { useChangePasswordMutation } from "@/features/profile/profileApi";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
 export default function SecuritySettings() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [changePassword, { isLoading: isChangingPassword }] = useChangePasswordMutation();
+
   const [passwords, setPasswords] = useState({
     currentPassword: "",
     newPassword: "",
@@ -52,12 +55,23 @@ export default function SecuritySettings() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
-    toast.success("Password changed successfully!");
-    closeModal();
+    try {
+      const res = await changePassword({
+        currentPassword: passwords.currentPassword,
+        newPassword: passwords.newPassword,
+        confirmPassword: passwords.confirmPassword,
+      }).unwrap();
+
+      toast.success(res?.message || "Password changed successfully!");
+      closeModal();
+    } catch (err: unknown) {
+      console.error("Change password error:", err);
+      toast.error((err as { data?: { message?: string } })?.data?.message || "Failed to change password.");
+    }
   };
 
   const closeModal = () => {
@@ -80,7 +94,7 @@ export default function SecuritySettings() {
       <div className="bg-[#F3F0EA] rounded-xl p-6 border border-black/5 space-y-2">
         <h3 className="font-bold text-[#1E1E1E] text-base">Password</h3>
         <p className="text-xs sm:text-sm text-neutral-600">
-          Last changed 3 months ago
+          Ensure your account is using a strong, unique password.
         </p>
 
         <div className="pt-2">
@@ -210,9 +224,11 @@ export default function SecuritySettings() {
 
                 <button
                   type="submit"
-                  className="bg-[#AC6135] hover:bg-[#97532c] text-white text-xs sm:text-sm font-medium px-5 py-2.5 rounded-lg transition-all shadow-2xs cursor-pointer"
+                  disabled={isChangingPassword}
+                  className="bg-[#AC6135] hover:bg-[#97532c] text-white text-xs sm:text-sm font-medium px-5 py-2.5 rounded-lg transition-all shadow-2xs cursor-pointer disabled:opacity-50 flex items-center gap-2"
                 >
-                  Update Password
+                  {isChangingPassword && <Loader2 className="w-4 h-4 animate-spin text-white" />}
+                  {isChangingPassword ? "Updating..." : "Update Password"}
                 </button>
               </div>
             </form>
@@ -222,4 +238,3 @@ export default function SecuritySettings() {
     </div>
   );
 }
-

@@ -1,9 +1,9 @@
 "use client";
 
-export type BookingTab = "All" | "Pending" | "Confirmed" | "Cancelled";
+export type BookingTab = "All" | "Pending" | "Confirmed" | "In Progress" | "Completed" | "Cancelled";
 
 interface BookingTabsProps {
-  activeTab: BookingTab;
+  activeTab: string;
   onTabChange: (tab: BookingTab) => void;
   tabs?: BookingTab[];
 }
@@ -11,12 +11,12 @@ interface BookingTabsProps {
 export default function BookingTabs({
   activeTab,
   onTabChange,
-  tabs = ["All", "Pending", "Confirmed", "Cancelled"],
+  tabs = ["All", "Pending", "Confirmed", "In Progress", "Completed", "Cancelled"],
 }: BookingTabsProps) {
   return (
-    <div className="flex items-center gap-6 border-b border-black/10 pb-0.5">
+    <div className="flex items-center gap-4 sm:gap-6 border-b border-black/10 pb-0.5 overflow-x-auto no-scrollbar">
       {tabs.map((tab) => {
-        const isActive = activeTab === tab;
+        const isActive = activeTab.toLowerCase() === tab.toLowerCase();
         const isCancelled = tab === "Cancelled";
 
         return (
@@ -24,7 +24,7 @@ export default function BookingTabs({
             key={tab}
             type="button"
             onClick={() => onTabChange(tab)}
-            className={`pb-2.5 text-xs sm:text-sm font-medium transition-all relative cursor-pointer ${
+            className={`pb-2.5 text-xs sm:text-sm font-medium transition-all relative cursor-pointer whitespace-nowrap ${
               isActive
                 ? isCancelled
                   ? "text-[#D9383A] font-semibold"

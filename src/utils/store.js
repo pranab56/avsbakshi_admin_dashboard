@@ -1,14 +1,26 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { authApi } from "../features/auth/authApi";
 import authReducer from "../features/auth/authSlice";
+import { baseApi } from "./apiBaseQuery";
 
-const apis = [authApi];
+
+const authResetMiddleware = (storeApi) => (next) => (action) => {
+  const result = next(action);
+  if (
+    action.type === "auth/logout" ||
+    action.type === "auth/setCredentials" ||
+    action.type === "auth/setUser" ||
+    action.type === "auth/setToken"
+  ) {
+    storeApi.dispatch(baseApi.util.resetApiState());
+  }
+  return result;
+};
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    ...Object.fromEntries(apis.map((api) => [api.reducerPath, api.reducer])),
+    [baseApi.reducerPath]: baseApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(apis.map((api) => api.middleware)),
+    getDefaultMiddleware().concat(baseApi.middleware, authResetMiddleware),
 });

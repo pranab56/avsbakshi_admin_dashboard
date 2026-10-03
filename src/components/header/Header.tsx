@@ -8,8 +8,11 @@ import { usePathname, useRouter } from "next/navigation";
 const PAGE_TITLE_MAP: Record<string, string> = {
   "/": "Dashboard",
   "/user-management": "User Management",
-  "/reservation-management": "Bookings Management",
-  "/revenue-management": "Transactions History",
+  "/categories": "Categories",
+  "/booking-management": "Bookings Management",
+  "/transaction": "Transactions History",
+  "/disclaimer": "Disclaimer",
+  "/faq": "FAQ Management",
   "/pricing": "Pricing",
   "/settings": "Settings",
   "/notifications": "Notifications",
@@ -19,7 +22,9 @@ export default function MyNavbar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const title = PAGE_TITLE_MAP[pathname] || "Dashboard";
+  const title =
+    PAGE_TITLE_MAP[pathname] ||
+    (pathname.startsWith("/disclaimer") ? "Disclaimer" : "Dashboard");
 
   return (
     <header className="flex h-16 items-center justify-between gap-4 bg-[#E6E6E6] px-6 w-full shrink-0 border-b border-neutral-300/40 select-none">

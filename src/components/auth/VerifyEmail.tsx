@@ -12,12 +12,17 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import {
+  useResendOtpMutation,
+  useVerifyOtpMutation,
+} from "../../features/auth/authApi";
 
 export default function VerifyEmail() {
   const [otp, setOtp] = useState<string>("");
   const [countdown, setCountdown] = useState<number>(0);
-  const [isLoadingOTPCheck, setIsLoadingOTPCheck] = useState<boolean>(false);
-  const [isLoadingResendOTP, setIsLoadingResendOTP] = useState<boolean>(false);
+
+  const [verifyOtp, { isLoading: isLoadingOTPCheck }] = useVerifyOtpMutation();
+  const [resendOtp, { isLoading: isLoadingResendOTP }] = useResendOtpMutation();
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -33,7 +38,7 @@ export default function VerifyEmail() {
     return () => clearInterval(timer);
   }, [countdown]);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (otp.length !== 6) {
@@ -41,25 +46,56 @@ export default function VerifyEmail() {
       return;
     }
 
-    setIsLoadingOTPCheck(true);
-    setTimeout(() => {
-      setIsLoadingOTPCheck(false);
-      toast.success("OTP verified successfully!");
-      router.push(
-        `/auth/reset-password?token=mock-reset-token-12345&forgetOtpMatchToken=mock-reset-token-12345`
+    if (!email) {
+      toast.error("Email address is missing. Please try from forgot password page again.");
+      return;
+    }
+
+    try {
+      const res = await verifyOtp({
+        email,
+        oneTimeCode: Number(otp),
+      }).unwrap();
+
+      toast.success(
+        res?.message || "Verification Successful: Please securely store and utilize this code for reset password"
       );
-    }, 600);
+
+      const resetToken = res?.data?.resetToken || res?.resetToken;
+      if (resetToken) {
+        router.push(`/auth/reset-password?token=${encodeURIComponent(resetToken)}`);
+      } else {
+        toast.error("Reset token not found in response.");
+      }
+    } catch (err: unknown) {
+      const apiErr = err as { data?: { message?: string; errorMessages?: Array<{ message?: string }> } };
+      const errorMessage =
+        apiErr?.data?.message ||
+        apiErr?.data?.errorMessages?.[0]?.message ||
+        "Verification failed. Please check your OTP.";
+      toast.error(errorMessage);
+    }
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     if (countdown > 0) return;
+    if (!email) {
+      toast.error("Email address is missing.");
+      return;
+    }
 
-    setIsLoadingResendOTP(true);
-    setTimeout(() => {
-      setIsLoadingResendOTP(false);
-      toast.success("Verification code resent!");
+    try {
+      const res = await resendOtp({ email }).unwrap();
+      toast.success(res?.message || "Verification code resent!");
       setCountdown(60);
-    }, 600);
+    } catch (err: unknown) {
+      const apiErr = err as { data?: { message?: string; errorMessages?: Array<{ message?: string }> } };
+      const errorMessage =
+        apiErr?.data?.message ||
+        apiErr?.data?.errorMessages?.[0]?.message ||
+        "Failed to resend code. Please try again.";
+      toast.error(errorMessage);
+    }
   };
 
   return (
