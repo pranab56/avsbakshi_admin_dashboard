@@ -114,6 +114,8 @@ export default function FaqManagementPage() {
     }
   };
 
+
+  // pronab
   // Delete Handler
   const handleDeleteConfirm = async () => {
     if (!deletingFaq) return;
