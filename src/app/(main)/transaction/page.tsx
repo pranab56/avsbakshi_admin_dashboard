@@ -58,7 +58,7 @@ export default function TransactionsHistoryPage() {
       </div>
 
       {/* ── Row 1: Stat Cards Component ── */}
-      <RevenueStats />
+      <RevenueStats transactions={transactions} isLoading={isLoading} />
 
       {/* ── Row 2: Transactions Table Component ── */}
       <RevenueTable

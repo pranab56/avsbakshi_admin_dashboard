@@ -44,6 +44,45 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/all-salon',
+        destination: '/salons',
+        permanent: false,
+      },
+      {
+        source: '/all-salons',
+        destination: '/salons',
+        permanent: false,
+      },
+      {
+        source: '/all-services',
+        destination: '/services',
+        permanent: false,
+      },
+      {
+        source: '/customer-management',
+        destination: '/customers',
+        permanent: false,
+      },
+      {
+        source: '/professional-management',
+        destination: '/professionals',
+        permanent: false,
+      },
+      {
+        source: '/booking-management',
+        destination: '/service-bookings',
+        permanent: false,
+      },
+      {
+        source: '/service-booking',
+        destination: '/service-bookings',
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

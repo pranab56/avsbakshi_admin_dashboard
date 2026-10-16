@@ -1,5 +1,6 @@
 "use client";
 
+import ModernDropdown, { DropdownOption } from "@/components/ui/ModernDropdown";
 import { useUpdateStatusMutation } from "@/features/users/usersApi";
 import { Loader2, Search, User as UserIcon } from "lucide-react";
 import Image from "next/image";
@@ -26,6 +27,8 @@ interface UserTableProps {
   onSearchChange: (value: string) => void;
   statusFilter: string;
   onStatusFilterChange: (value: string) => void;
+  searchPlaceholder?: string;
+  emptyText?: string;
 }
 
 export default function UserTable({
@@ -35,6 +38,8 @@ export default function UserTable({
   onSearchChange,
   statusFilter,
   onStatusFilterChange,
+  searchPlaceholder = "Search by name, email or UID...",
+  emptyText = "No users found matching criteria.",
 }: UserTableProps) {
   const [updateStatus, { isLoading: isUpdating }] = useUpdateStatusMutation();
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -93,26 +98,24 @@ export default function UserTable({
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
           <input
             type="text"
-            placeholder="Search by name, email or UID..."
+            placeholder={searchPlaceholder}
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full bg-white border border-black/5 rounded-lg h-10 pl-10 pr-4 text-xs sm:text-sm text-[#1E1E1E] placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#AC6135]/50 transition-all"
           />
         </div>
 
-        {/* Status Filter */}
-        <div className="flex items-center gap-2">
-          <label className="text-xs font-semibold text-neutral-600 whitespace-nowrap">Filter Status:</label>
-          <select
-            value={statusFilter}
-            onChange={(e) => onStatusFilterChange(e.target.value)}
-            className="bg-white border border-black/5 rounded-lg h-10 px-3 text-xs text-[#1E1E1E] focus:outline-none focus:ring-2 focus:ring-[#AC6135]/50 cursor-pointer"
-          >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-        </div>
+        {/* Modern Status Filter Dropdown */}
+        <ModernDropdown
+          label="Filter Status:"
+          value={statusFilter}
+          onChange={onStatusFilterChange}
+          options={[
+            { label: "All Status", value: "all", color: "bg-neutral-400" },
+            { label: "Active", value: "active", color: "bg-[#2C7446]" },
+            { label: "Inactive", value: "inactive", color: "bg-[#D9383A]" },
+          ]}
+        />
       </div>
 
       {/* Table Container */}
@@ -145,7 +148,7 @@ export default function UserTable({
               ) : users.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-neutral-500 text-sm font-medium">
-                    No users found matching criteria.
+                    {emptyText}
                   </td>
                 </tr>
               ) : (
@@ -161,11 +164,13 @@ export default function UserTable({
                         <div className="flex items-center gap-3.5">
                           <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-neutral-200 flex items-center justify-center">
                             {user.image ? (
-                              <Image
+                              <img
                                 src={user.image}
                                 alt={fullName}
-                                fill
-                                className="object-cover"
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  (e.currentTarget as HTMLImageElement).style.display = "none";
+                                }}
                               />
                             ) : (
                               <UserIcon className="w-5 h-5 text-neutral-400" />

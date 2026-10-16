@@ -4,11 +4,13 @@ export const usersApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
         // 1. Get All Users
         getAllUsers: builder.query({
-            query: ({ searchTerm = "", page, status = "" } = {}) => {
+            query: ({ searchTerm = "", page, status = "", role = "", limit = 10 } = {}) => {
                 const params = new URLSearchParams();
                 if (page) params.append("page", String(page));
+                if (limit) params.append("limit", String(limit));
                 if (searchTerm) params.append("searchTerm", searchTerm);
                 if (status && status !== "all") params.append("status", status);
+                if (role && role !== "all") params.append("role", role);
 
                 return {
                     url: `/users/all?${params.toString()}`,

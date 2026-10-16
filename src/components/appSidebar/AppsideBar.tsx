@@ -15,6 +15,7 @@ import {
 import { logout } from "@/features/auth/authSlice";
 import { cn } from "@/lib/utils";
 import {
+    Briefcase,
     CalendarCheck,
     FileText,
     FolderTree,
@@ -22,8 +23,11 @@ import {
     LayoutGrid,
     LogOut,
     LucideIcon,
+    Scissors,
     Settings,
     ShieldCheck,
+    Store,
+    UserCheck,
     Users,
 } from "lucide-react";
 import Image from "next/image";
@@ -53,10 +57,14 @@ type MenuItem = {
 
 const menuItems: MenuItem[] = [
     { name: "Dashboard", path: "/", icon: LayoutGrid, key: "overview" },
-    { name: "User Management", path: "/user-management", icon: Users, key: "customer" },
+    { name: "Customers", path: "/customers", icon: Users, key: "customer" },
+    { name: "Professionals", path: "/professionals", icon: UserCheck, key: "professional" },
+    { name: "Salons", path: "/salons", icon: Store, key: "salon" },
+    { name: "Services", path: "/services", icon: Scissors, key: "services" },
     { name: "Categories", path: "/categories", icon: FolderTree, key: "category" },
-    { name: "Bookings Management", path: "/booking-management", icon: CalendarCheck, key: "booking" },
-    { name: "Transactions History", path: "/transaction", icon: FileText, key: "revenue" },
+    { name: "Workspace Bookings", path: "/workspace", icon: Briefcase },
+    { name: "Service Bookings", path: "/service-bookings", icon: CalendarCheck, key: "booking" },
+    { name: "Transactions", path: "/transaction", icon: FileText, key: "revenue" },
     { name: "Disclaimer", path: "/disclaimer", icon: ShieldCheck, key: "disclaimer" },
     { name: "FAQ", path: "/faq", icon: HelpCircle, key: "faq" },
     { name: "Settings", path: "/settings", icon: Settings, key: "settings" },

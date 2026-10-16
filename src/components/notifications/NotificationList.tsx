@@ -22,56 +22,7 @@ export interface NotificationItem {
   isRead: boolean;
 }
 
-const INITIAL_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: "notif-1",
-    title: "New Booking Request #BK-9842",
-    description: "Rachel Thompson requested a Hair Styling & Spa appointment for Sept 12 at 2:30 PM.",
-    timestamp: "5 mins ago",
-    type: "booking",
-    isRead: false,
-  },
-  {
-    id: "notif-2",
-    title: "Payment Received ($145.00)",
-    description: "Transaction #TX-7731 for Luxury Manicure & Pedicure successfully processed.",
-    timestamp: "25 mins ago",
-    type: "payment",
-    isRead: false,
-  },
-  {
-    id: "notif-3",
-    title: "New Client Registration",
-    description: "Eleanor Vance created a new salon membership account.",
-    timestamp: "1 hour ago",
-    type: "user",
-    isRead: false,
-  },
-  {
-    id: "notif-4",
-    title: "System Update Complete",
-    description: "Salon scheduling engine was successfully updated to v2.4.0.",
-    timestamp: "3 hours ago",
-    type: "system",
-    isRead: true,
-  },
-  {
-    id: "notif-5",
-    title: "5-Star Review Received",
-    description: "Sarah Jenkins left a 5-star review: 'Best salon experience in town!'",
-    timestamp: "Yesterday at 5:20 PM",
-    type: "review",
-    isRead: true,
-  },
-  {
-    id: "notif-6",
-    title: "Booking Cancelled #BK-8812",
-    description: "Appointment for David Miller was cancelled by the client.",
-    timestamp: "2 days ago",
-    type: "booking",
-    isRead: true,
-  },
-];
+const INITIAL_NOTIFICATIONS: NotificationItem[] = [];
 
 type FilterTab = "all" | "unread" | "booking" | "payment" | "system";
 
