@@ -158,19 +158,27 @@ export default function BarChart() {
                 dataKey="monthName"
                 axisLine={false}
                 tickLine={false}
-                tick={({ x, y, payload }) => {
-                  const isActive = activeMonth === payload.value;
+                tick={({
+                  x,
+                  y,
+                  payload,
+                }: {
+                  x?: number | string;
+                  y?: number | string;
+                  payload?: { value?: string };
+                }) => {
+                  const isActive = activeMonth === payload?.value;
                   return (
                     <text
                       x={x}
-                      y={y + 14}
+                      y={Number(y) + 14}
                       textAnchor="middle"
                       fill={isActive ? "#B8784A" : "#B8784A80"}
                       fontSize={12}
                       fontWeight={isActive ? 600 : 400}
                       className="cursor-pointer transition-colors"
                     >
-                      {payload.value}
+                      {payload?.value}
                     </text>
                   );
                 }}
