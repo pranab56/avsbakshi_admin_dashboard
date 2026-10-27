@@ -60,7 +60,7 @@ export default function ProfessionalManagementPage() {
           setStatusFilter(val);
           setCurrentPage(1);
         }}
-        searchPlaceholder="Search professionals by name, email or UID..."
+        searchPlaceholder="Search professionals by name or email..."
         emptyText="No professional accounts found matching criteria."
       />
 

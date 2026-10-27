@@ -58,7 +58,7 @@ export default function CustomerManagementPage() {
           setStatusFilter(val);
           setCurrentPage(1);
         }}
-        searchPlaceholder="Search customers by name, email or UID..."
+        searchPlaceholder="Search customers by name or email..."
         emptyText="No customer accounts found matching criteria."
       />
 

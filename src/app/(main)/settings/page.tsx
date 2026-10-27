@@ -1,5 +1,6 @@
 "use client";
 
+import PlatformSettings from "@/components/settings/PlatformSettings";
 import ProfileSettings from "@/components/settings/ProfileSettings";
 import SecuritySettings from "@/components/settings/SecuritySettings";
 import SettingsSidebar, { SettingsTab } from "@/components/settings/SettingsSidebar";
@@ -24,7 +25,9 @@ export default function SettingsPage() {
 
         {/* Dynamic Content Panel */}
         <div>
-          {activeTab === "profile" ? <ProfileSettings /> : <SecuritySettings />}
+          {activeTab === "profile" && <ProfileSettings />}
+          {activeTab === "security" && <SecuritySettings />}
+          {activeTab === "platform" && <PlatformSettings />}
         </div>
       </div>
     </div>

@@ -7,6 +7,7 @@ import {
   useUpdateSalonStatusMutation,
 } from "@/features/salon/salonApi";
 import {
+  AlertTriangle,
   Calendar,
   Clock,
   ExternalLink,
@@ -19,6 +20,8 @@ import {
   Phone,
   RotateCcw,
   Search,
+  ShieldAlert,
+  ShieldCheck,
   Star,
   Store,
   User as UserIcon,
@@ -92,6 +95,12 @@ export default function AllSalonPage() {
   const [selectedSalon, setSelectedSalon] = useState<ApiSalon | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
+  // Confirmation popup state for block/unblock
+  const [confirmAction, setConfirmAction] = useState<{
+    salon: ApiSalon;
+    nextStatus: "active" | "inactive";
+  } | null>(null);
+
   // RTK Query: fetch salons from API
   const {
     data: response,
@@ -115,20 +124,19 @@ export default function AllSalonPage() {
     totalPage: 1,
   };
 
-  // Filter salons
+  // Filter salons strictly by name and email, not UID
   const displayedSalons = useMemo(() => {
     return rawSalons.filter((s) => {
-      // Local search filtering if not handled by API
       if (searchTerm.trim() !== "") {
         const query = searchTerm.toLowerCase();
         const matchesName = s.name?.toLowerCase().includes(query);
         const matchesOwner = `${s.createdBy?.firstName || ""} ${s.createdBy?.lastName || ""}`
           .toLowerCase()
           .includes(query);
-        const matchesEmail = s.email?.toLowerCase().includes(query) || s.createdBy?.email?.toLowerCase().includes(query);
-        const matchesUid = s.uid?.toLowerCase().includes(query);
-        const matchesCity = s.address?.city?.toLowerCase().includes(query);
-        if (!matchesName && !matchesOwner && !matchesEmail && !matchesUid && !matchesCity) {
+        const matchesEmail =
+          s.email?.toLowerCase().includes(query) ||
+          s.createdBy?.email?.toLowerCase().includes(query);
+        if (!matchesName && !matchesOwner && !matchesEmail) {
           return false;
         }
       }
@@ -136,8 +144,9 @@ export default function AllSalonPage() {
     });
   }, [rawSalons, searchTerm]);
 
-  const handleStatusToggle = async (salon: ApiSalon) => {
-    const nextStatus = salon.status === "active" ? "inactive" : "active";
+  const handleConfirmStatusChange = async () => {
+    if (!confirmAction) return;
+    const { salon, nextStatus } = confirmAction;
     setUpdatingId(salon._id);
 
     try {
@@ -147,14 +156,21 @@ export default function AllSalonPage() {
         data: { status: nextStatus },
       }).unwrap();
 
-      toast.success(res?.message || `Salon status updated to ${nextStatus}`);
+      toast.success(
+        res?.message ||
+          `Salon ${nextStatus === "active" ? "unblocked" : "blocked"} successfully`
+      );
 
       // If the detail modal is currently showing this salon, update its local state
       if (selectedSalon && selectedSalon._id === salon._id) {
         setSelectedSalon((prev) => (prev ? { ...prev, status: nextStatus } : null));
       }
+
+      setConfirmAction(null);
     } catch (err: unknown) {
-      const apiErr = err as { data?: { message?: string; errorMessages?: Array<{ message?: string }> } };
+      const apiErr = err as {
+        data?: { message?: string; errorMessages?: Array<{ message?: string }> };
+      };
       const msg =
         apiErr?.data?.message ||
         apiErr?.data?.errorMessages?.[0]?.message ||
@@ -212,7 +228,7 @@ export default function AllSalonPage() {
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
           <input
             type="text"
-            placeholder="Search by salon name, email or UID..."
+            placeholder="Search by name or email..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -401,7 +417,10 @@ export default function AllSalonPage() {
                             aria-checked={isActive}
                             title={isActive ? "Deactivate salon" : "Activate salon"}
                             disabled={isCurrentUpdating}
-                            onClick={() => handleStatusToggle(salon)}
+                            onClick={() => {
+                              const nextStatus = isActive ? "inactive" : "active";
+                              setConfirmAction({ salon, nextStatus });
+                            }}
                             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#A67528]/50 disabled:opacity-50 ${isActive ? "bg-[#2C7446]" : "bg-neutral-300"
                               }`}
                           >
@@ -431,7 +450,7 @@ export default function AllSalonPage() {
       {/* ── Salon Full Detail Modal ── */}
       {selectedSalon && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 overflow-y-auto">
-          <div className="bg-[#FFFDF9] rounded-2xl w-full max-w-2xl border border-black/10 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col my-auto">
+          <div className="bg-[#FFFDF9] rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col my-auto">
             {/* Modal Header */}
             <div className="bg-[#161618] text-white p-6 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3.5">
@@ -655,7 +674,10 @@ export default function AllSalonPage() {
               <button
                 type="button"
                 disabled={updatingId === selectedSalon._id}
-                onClick={() => handleStatusToggle(selectedSalon)}
+                onClick={() => {
+                  const nextStatus = selectedSalon.status === "active" ? "inactive" : "active";
+                  setConfirmAction({ salon: selectedSalon, nextStatus });
+                }}
                 className={`px-4 py-2 rounded-xl text-white text-xs font-medium cursor-pointer transition-colors flex items-center gap-1.5 disabled:opacity-50 ${selectedSalon.status === "active"
                     ? "bg-[#D9383A] hover:bg-[#c53032]"
                     : "bg-[#B07D2B] hover:bg-[#9A6D24]"
@@ -663,6 +685,89 @@ export default function AllSalonPage() {
               >
                 {updatingId === selectedSalon._id && <Loader2 className="w-3 h-3 animate-spin" />}
                 {selectedSalon.status === "active" ? "Deactivate Salon" : "Activate Salon"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Confirmation Popup when Block/Unblock Salon ── */}
+      {confirmAction && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200">
+            {/* Header Icon & Title */}
+            <div className="flex items-start gap-3.5">
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                  confirmAction.nextStatus === "inactive"
+                    ? "bg-red-50 text-red-600"
+                    : "bg-emerald-50 text-emerald-600"
+                }`}
+              >
+                {confirmAction.nextStatus === "inactive" ? (
+                  <AlertTriangle className="w-5 h-5" />
+                ) : (
+                  <ShieldCheck className="w-5 h-5" />
+                )}
+              </div>
+              <div>
+                <h3 className="text-lg font-serif italic text-[#1E1E1E] font-medium leading-tight">
+                  {confirmAction.nextStatus === "inactive"
+                    ? "Block Salon?"
+                    : "Unblock Salon?"}
+                </h3>
+                <p className="text-xs text-neutral-500 mt-1">
+                  Action confirmation required.
+                </p>
+              </div>
+            </div>
+
+            {/* Message Body */}
+            <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed bg-[#FAF8F4] p-3.5 rounded-xl border border-black/5">
+              {confirmAction.nextStatus === "inactive" ? (
+                <>
+                  Are you sure you want to block{" "}
+                  <strong className="text-[#1E1E1E]">{confirmAction.salon.name}</strong>
+                  ? This salon and its services will be deactivated on the platform.
+                </>
+              ) : (
+                <>
+                  Are you sure you want to unblock{" "}
+                  <strong className="text-[#1E1E1E]">{confirmAction.salon.name}</strong>
+                  ? This salon will be activated and open for bookings.
+                </>
+              )}
+            </p>
+
+            {/* Action Buttons */}
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                disabled={updatingId === confirmAction.salon._id}
+                onClick={() => setConfirmAction(null)}
+                className="text-xs font-medium text-neutral-700 hover:text-neutral-900 px-4 py-2.5 rounded-xl border border-gray-200 hover:bg-neutral-50 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                disabled={updatingId === confirmAction.salon._id}
+                onClick={handleConfirmStatusChange}
+                className={`text-xs sm:text-sm font-medium px-5 py-2.5 rounded-xl transition-all shadow-2xs cursor-pointer disabled:opacity-50 flex items-center gap-2 ${
+                  confirmAction.nextStatus === "inactive"
+                    ? "bg-red-600 hover:bg-red-700 text-white"
+                    : "bg-[#2C7446] hover:bg-[#235e38] text-white"
+                }`}
+              >
+                {updatingId === confirmAction.salon._id && (
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                )}
+                {updatingId === confirmAction.salon._id
+                  ? "Updating..."
+                  : confirmAction.nextStatus === "inactive"
+                  ? "Yes, Block Salon"
+                  : "Yes, Unblock Salon"}
               </button>
             </div>
           </div>

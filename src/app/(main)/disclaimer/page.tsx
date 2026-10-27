@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, FileText, Info, ShieldCheck, UserCheck } from "lucide-react";
+import { ChevronRight, FileText, ShieldCheck, UserCheck } from "lucide-react";
 import Link from "next/link";
 
 export type DisclaimerItem = {
@@ -34,18 +34,9 @@ const DISCLAIMER_ITEMS: DisclaimerItem[] = [
   },
   {
     id: "3",
-    slug: "about_us",
-    type: "about_us",
-    title: "About Us",
-    description: "Company information, mission statement, and platform overview.",
-    icon: Info,
-    updatedAtText: "Updated regularly",
-  },
-  {
-    id: "4",
-    slug: "user_agreement",
-    type: "user_agreement",
-    title: "User Agreement",
+    slug: "cancellation_policy",
+    type: "cancellation_policy",
+    title: "Cancellation Policy",
     description: "Mutual agreements and compliance rules between users and salon operators.",
     icon: UserCheck,
     updatedAtText: "Updated regularly",

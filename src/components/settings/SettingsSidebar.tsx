@@ -1,6 +1,6 @@
 "use client";
 
-export type SettingsTab = "profile" | "security";
+export type SettingsTab = "profile" | "security" | "platform";
 
 interface SettingsSidebarProps {
   activeTab: SettingsTab;
@@ -35,6 +35,18 @@ export default function SettingsSidebar({
         }`}
       >
         Security
+      </button>
+
+      <button
+        type="button"
+        onClick={() => onTabChange("platform")}
+        className={`w-full text-left px-4 py-3 rounded-xl font-medium text-sm transition-all cursor-pointer ${
+          activeTab === "platform"
+            ? "bg-[#F5EDE4] text-[#AC6135] font-semibold shadow-2xs"
+            : "text-[#2B2927] hover:bg-[#D6CEC3]/50"
+        }`}
+      >
+        Platform Settings
       </button>
     </div>
   );

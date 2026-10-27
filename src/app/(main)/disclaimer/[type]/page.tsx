@@ -16,7 +16,7 @@ function normalizeType(slug: string): string {
   if (s === "privacy" || s === "privacy_policy") return "privacy_policy";
   if (s === "terms" || s === "terms_of_service") return "terms_of_service";
   if (s === "about" || s === "about_us") return "about_us";
-  if (s === "user" || s === "user_agreement") return "user_agreement";
+  if (s === "cancellation" || s === "cancellation_policy") return "cancellation_policy";
   return s;
 }
 
@@ -28,8 +28,8 @@ function getTitleFromType(apiType: string): string {
       return "Terms of Service";
     case "about_us":
       return "About Us";
-    case "user_agreement":
-      return "User Agreement";
+    case "cancellation_policy":
+      return "Cancellation Policy";
     default:
       return apiType
         .split("_")
