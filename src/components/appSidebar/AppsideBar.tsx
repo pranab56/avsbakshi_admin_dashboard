@@ -12,11 +12,13 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar";
+
 import { logout } from "@/features/auth/authSlice";
+
 import { cn } from "@/lib/utils";
+
 import {
     Briefcase,
-    CalendarCheck,
     FileText,
     FolderTree,
     HelpCircle,
@@ -30,11 +32,17 @@ import {
     UserCheck,
     Users,
 } from "lucide-react";
+
 import Image from "next/image";
+
 import Link from "next/link";
+
 import { usePathname } from "next/navigation";
+
 import { useState } from "react";
+
 import { useDispatch, useSelector } from "react-redux";
+
 import {
     AlertDialog,
     AlertDialogAction,
@@ -61,9 +69,8 @@ const menuItems: MenuItem[] = [
     { name: "Professionals", path: "/professionals", icon: UserCheck, key: "professional" },
     { name: "Salons", path: "/salons", icon: Store, key: "salon" },
     { name: "Services", path: "/services", icon: Scissors, key: "services" },
-    { name: "Categories", path: "/categories", icon: FolderTree, key: "category" },
     { name: "Workspace Bookings", path: "/workspace", icon: Briefcase },
-    { name: "Service Bookings", path: "/service-bookings", icon: CalendarCheck, key: "booking" },
+    { name: "Categories", path: "/categories", icon: FolderTree, key: "category" },
     { name: "Transactions", path: "/transaction", icon: FileText, key: "revenue" },
     { name: "Disclaimer", path: "/disclaimer", icon: ShieldCheck, key: "disclaimer" },
     { name: "FAQ", path: "/faq", icon: HelpCircle, key: "faq" },
@@ -97,16 +104,13 @@ export default function AppSideBar() {
     const handleLogout = () => {
         setIsLogoutModalOpen(false);
         dispatch(logout());
-
         // Ensure cookies are cleared immediately on the client side
         document.cookie = "salon-admin-token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
         document.cookie = "realState-token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
         document.cookie = "salon-role=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
-
         toast.success("Logged out successfully");
         window.location.href = "/auth/login";
     };
-
     return (
         <Sidebar collapsible="icon" className="border-none">
             <SidebarContent
